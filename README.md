@@ -176,7 +176,6 @@ If 0 -> 0
 
 **c.** Karena takut lag dalam pengerjaannya membantu Loba, Crypto juga membuat program (soal2c.c) untuk mengecek 5 proses teratas apa saja yang memakan resource komputernya dengan command “ps aux | sort -nrk 3,3 | head -5” (Catatan!: Harus menggunakan IPC Pipes)
 
-
 ## Soal 3 ##
 
 Seorang mahasiswa bernama Alex sedang mengalami masa gabut. Di saat masa gabutnya, ia memikirkan untuk merapikan sejumlah file yang ada di laptopnya. Karena jumlah filenya terlalu banyak, Alex meminta saran ke Ayub. Ayub menyarankan untuk membuat sebuah program C agar file-file dapat dikategorikan. Program ini akan memindahkan file sesuai ekstensinya ke dalam folder sesuai ekstensinya yang folder hasilnya terdapat di working directory ketika program kategori tersebut dijalankan.
@@ -213,7 +212,13 @@ File 3 : Berhasil Dikategorikan
 
 ### Cara Pengerjaan ###
 
-1. 
+1. Looping untuk memproses semua file yang ada dalam array argv.
+2. Untuk setiap file dibuat sebuah thread yang disimpan dalam array fileThread dan mempassing fungsi moveFile dan nama filenya sebagai argumen untuk fungsi moveFile.
+3. Setelah dibuat sebanyak FILES_MAX, program akan menunggu agar semua thread selesai, kemudian melakukan join thread.
+4. Dalam fungsi moveFile, pertama dicek apabila filenya ada atau tidak, jika tidak ada maka gagal.
+5. Kemudian fungsi mengecek apabila file tersebut merupakan file biasa, file hidden, atau file dengan tipe yang unknown.
+6. Jika filenya merupakan file biasa, maka akan dibuatkan folder sesuai ekstensinya, jika filenya hidden maka akan dibuatkan folder Hidden, jika filenya Unknown dibuatkan folder Unknown.
+7. Setelah itu file dipindahkan.
 
 ### Kendala ###
 
@@ -242,7 +247,9 @@ Jika gagal, print “Yah, gagal disimpan :(“
 
 ### Cara Pengerjaan ###
 
-1.
+1. Membaca isi direktori yang diberikan sebagai argumen ke fungsi moveDir.
+2. Memindahkan semua file yang ada dalam direktori tersebut dengan memanggil fungsi moveFile dan mempassing path dan nama file tersebut sebagai argumennya.
+3. Setelah semua file dalam direktori dipindahkan, maka fungsi akan memanggil moveDir dengan argumen path direktori lain.
 
 ### Kendala ###
 
@@ -261,7 +268,7 @@ menjalankan program C tersebut.
 
 ### Cara Pengerjaan ###
 
-1.
+1. Hampir sama dengan no b, hanya saja ketika awal dipanggil mempassing path "." untuk fungsi moveDir.
 
 ### Kendala ###
 
@@ -274,7 +281,7 @@ Tidak ada kendala.
 
 ### Cara Pengerjaan ###
 
-1.
+1. Sudah dikerjakan di no a pada fungsi moveFile.
 
 ### Kendala ###
 
@@ -287,7 +294,7 @@ Tidak ada kendala.
 
 ### Cara Pengerjaan ###
 
-1.
+1. Sudah dikerjakan di no a dan b.
 
 ### Kendala ###
 
