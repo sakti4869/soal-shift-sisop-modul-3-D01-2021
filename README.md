@@ -98,6 +98,10 @@ Jika berhasil, print “Direktori sukses disimpan!”
 Jika gagal, print “Yah, gagal disimpan :(“
 ```
 
+![Soal3B1](https://i.postimg.cc/mgZhyQ0x/2.png)
+![Soal3B2](https://i.postimg.cc/TY3XkCYc/b0.png)
+![Soal3B3](https://i.postimg.cc/fygqq7BH/b1.png)
+
 **(c)** Selain menerima opsi-opsi di atas, program ini menerima opsi \*, contohnya ada di bawah ini:
 
 ```
@@ -107,6 +111,14 @@ $ ./soal3 \*
 Opsi ini akan mengkategorikan seluruh file yang ada di working directory ketika
 menjalankan program C tersebut.
 
+![Soal3C1](https://i.postimg.cc/mgZhyQ0x/2.png)
+
 **(d)** Semua file harus berada di dalam folder, jika terdapat file yang tidak memiliki ekstensi, file disimpan dalam folder “Unknown”. Jika file hidden, masuk folder “Hidden”.
 
+![Soal3D1](https://i.postimg.cc/vTSZZjZG/a0.png)
+![Soal3D2](https://i.postimg.cc/LXxxhBKH/hidden.png)
+
 **(e)** Setiap 1 file yang dikategorikan dioperasikan oleh 1 thread agar bisa berjalan secara paralel sehingga proses kategori bisa berjalan lebih cepat.
+
+![Soal3E1](https://i.postimg.cc/g2bHzBXV/pakethread1.png)
+![Soal3E2](https://i.postimg.cc/fygqq7BH/b1.png)
