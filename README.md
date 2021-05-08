@@ -107,18 +107,74 @@ Hapus : File2.ektensi (id:pass)
 
 ## Soal 2 ##
 
-a. Crypto (kamu) adalah teman Loba. Suatu pagi, Crypto melihat Loba yang sedang kewalahan mengerjakan tugas dari bosnya. Karena Crypto adalah orang yang sangat menyukai tantangan, dia ingin membantu Loba mengerjakan tugasnya. Detil dari tugas tersebut adalah:
+Crypto (kamu) adalah teman Loba. Suatu pagi, Crypto melihat Loba yang sedang kewalahan mengerjakan tugas dari bosnya. Karena Crypto adalah orang yang sangat menyukai tantangan, dia ingin membantu Loba mengerjakan tugasnya. Detil dari tugas tersebut adalah:
 
-b. Membuat program perkalian matrix (4x3 dengan 3x6) dan menampilkan hasilnya. Matriks nantinya akan berisi angka 1-20 (tidak perlu dibuat filter angka).
+**a.** Membuat program perkalian matrix (4x3 dengan 3x6) dan menampilkan hasilnya. Matriks nantinya akan berisi angka 1-20 (tidak perlu dibuat filter angka).
 
-c. Membuat program dengan menggunakan matriks output dari program sebelumnya (program soal2a.c) (Catatan!: gunakan shared memory). Kemudian matriks tersebut akan dilakukan perhitungan dengan matrix baru (input user) sebagai berikut contoh perhitungan untuk matriks yang ada. Perhitungannya adalah setiap cel yang berasal dari matriks A menjadi angka untuk faktorial, lalu cel dari matriks B menjadi batas maksimal faktorialnya (dari paling besar ke paling kecil) (Catatan!: gunakan thread untuk perhitungan di setiap cel). 
+Pertama, kita perlu menuliskan kode untuk menerima input array 4x3 dan 3x6 dari pengguna. Hal ini bisa dilakukan dengan menggunakan loop dan scanf.
+```
+   int arr1[4][3];
+   int arr2[3][6];
+   
+	printf("Matrix 4x3:\n");
+	for(int i=0; i<4; i++){
+		for(int j=0; j<3; j++){
+			scanf("%d", &arr1[i][j]);
+		}
+	}
+   
+	printf("\nMatrix 3x6:\n");
+	for(int i=0; i<3; i++){
+		for(int j=0; j<6; j++){
+			scanf("%d", &arr2[i][j]);
+		}
+	}
+```
+
+Selanjutnya, kita perlu menampilkan hasil perkalian matrix 4x3 dan 3x6 yang diinputkan user ke monitor.
+```
+   printf("\nResulting Matrix 4x6:\n");
+	for(int i=0; i<4; i++){
+		for(int j=0; j<6; j++){
+			arr3[i][j]=0;
+			for(int k=0; k<3; k++){ 
+				arr3[i][j] += arr1[i][k] * arr2[k][j];
+			}
+			printf("%d ", arr3[i][j]);
+		}
+		printf("\n");
+	}
+```
+
+Karena nantinya kita memerlukan matrix hasil program ```soal2a.c``` untuk pengerjaan ```soal2b.c```, maka kita gunakan shared memory. Pertama, kita buat key untuk mengakses shared memory tersebut.
+```
+key_t key = ftok(".", 'b');
+```
+
+Selanjutnya, key disimpan di sebuah file ```key.txt``` agar bisa diakses program ```soal2b.c```.
+```
+FILE *keyid = fopen("key.txt", "w");
+fprintf(keyid, "%d", key);
+fclose(keyid);
+```
+
+Kemudian, kita buat space untuk shared memory dengan key yang kita buat sebelumnya. KIta lakukan juga attach shared memory, agar isi arr3 bisa dimodifikasi dan digunakan program lain.
+```
+if ((matrixID = shmget(key, 100, IPC_CREAT | 0666)) < 0)
+        	printf("smget returned -1\n");
+if (!(arr3 = shmat(matrixID, NULL, 0))){
+         printf("Process shmat returned NULL\n");
+}
+```
+
+**b.** Membuat program dengan menggunakan matriks output dari program sebelumnya (program soal2a.c) (Catatan!: gunakan shared memory). Kemudian matriks tersebut akan dilakukan perhitungan dengan matrix baru (input user) sebagai berikut contoh perhitungan untuk matriks yang ada. Perhitungannya adalah setiap cel yang berasal dari matriks A menjadi angka untuk faktorial, lalu cel dari matriks B menjadi batas maksimal faktorialnya (dari paling besar ke paling kecil) (Catatan!: gunakan thread untuk perhitungan di setiap cel). 
 
 Ketentuan		
 If a >= b  -> a!/(a-b)!
 If b > a -> a!
 If 0 -> 0
 
-Karena takut lag dalam pengerjaannya membantu Loba, Crypto juga membuat program (soal2c.c) untuk mengecek 5 proses teratas apa saja yang memakan resource komputernya dengan command “ps aux | sort -nrk 3,3 | head -5” (Catatan!: Harus menggunakan IPC Pipes)
+**c.** Karena takut lag dalam pengerjaannya membantu Loba, Crypto juga membuat program (soal2c.c) untuk mengecek 5 proses teratas apa saja yang memakan resource komputernya dengan command “ps aux | sort -nrk 3,3 | head -5” (Catatan!: Harus menggunakan IPC Pipes)
 
 
 ## Soal 3 ##
