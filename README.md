@@ -63,6 +63,11 @@ File 2 : Sad, gagal :( (jika gagal)
 File 3 : Berhasil Dikategorikan
 ```
 
+![Soal3A1](https://i.postimg.cc/MGRMrWKV/1.png)
+![Soal3A2](https://i.postimg.cc/vTSZZjZG/a0.png)
+![Soal3A3](https://i.postimg.cc/XqZ0Qvn0/a1.png)
+![Soal3A4](https://i.postimg.cc/QtT2TymX/a2.png)
+
 **(b)** Program juga dapat menerima opsi -d untuk melakukan pengkategorian pada suatu directory. Namun pada opsi -d ini, user hanya bisa memasukkan input 1 directory saja, tidak seperti file yang bebas menginput file sebanyak mungkin.
 
 Contohnya adalah seperti ini:
