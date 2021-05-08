@@ -83,13 +83,15 @@ Publisher:
 Tahun publishing:
 Ekstensi File : 
 Filepath : 
-
+``
+``
 Nama:
 Publisher:
 Tahun publishing:
 Ekstensi File : 
 Filepath : 
 ``
+
 g. Aplikasi client juga dapat melakukan pencarian dengan memberikan suatu string. Hasilnya adalah semua nama file yang mengandung string tersebut. Format output seperti format output f.
 
 Contoh Client Command:
