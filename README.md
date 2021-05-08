@@ -81,6 +81,14 @@ File 3 : Berhasil Dikategorikan
 ![Soal3A3](https://i.postimg.cc/XqZ0Qvn0/a1.png)
 ![Soal3A4](https://i.postimg.cc/QtT2TymX/a2.png)
 
+### Cara Pengerjaan ###
+
+1. 
+
+### Kendala ###
+
+Tidak ada kendala.
+
 **(b)** Program juga dapat menerima opsi -d untuk melakukan pengkategorian pada suatu directory. Namun pada opsi -d ini, user hanya bisa memasukkan input 1 directory saja, tidak seperti file yang bebas menginput file sebanyak mungkin.
 
 Contohnya adalah seperti ini:
@@ -102,6 +110,14 @@ Jika gagal, print “Yah, gagal disimpan :(“
 ![Soal3B2](https://i.postimg.cc/TY3XkCYc/b0.png)
 ![Soal3B3](https://i.postimg.cc/fygqq7BH/b1.png)
 
+### Cara Pengerjaan ###
+
+1.
+
+### Kendala ###
+
+Tidak ada kendala.
+
 **(c)** Selain menerima opsi-opsi di atas, program ini menerima opsi \*, contohnya ada di bawah ini:
 
 ```
@@ -113,12 +129,36 @@ menjalankan program C tersebut.
 
 ![Soal3C1](https://i.postimg.cc/mgZhyQ0x/2.png)
 
+### Cara Pengerjaan ###
+
+1.
+
+### Kendala ###
+
+Tidak ada kendala.
+
 **(d)** Semua file harus berada di dalam folder, jika terdapat file yang tidak memiliki ekstensi, file disimpan dalam folder “Unknown”. Jika file hidden, masuk folder “Hidden”.
 
 ![Soal3D1](https://i.postimg.cc/vTSZZjZG/a0.png)
 ![Soal3D2](https://i.postimg.cc/LXxxhBKH/hidden.png)
 
+### Cara Pengerjaan ###
+
+1.
+
+### Kendala ###
+
+Tidak ada kendala.
+
 **(e)** Setiap 1 file yang dikategorikan dioperasikan oleh 1 thread agar bisa berjalan secara paralel sehingga proses kategori bisa berjalan lebih cepat.
 
 ![Soal3E1](https://i.postimg.cc/g2bHzBXV/pakethread1.png)
 ![Soal3E2](https://i.postimg.cc/fygqq7BH/b1.png)
+
+### Cara Pengerjaan ###
+
+1.
+
+### Kendala ###
+
+Tidak ada kendala.
