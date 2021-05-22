@@ -8,7 +8,8 @@ int main(int argc, char* argv[]){
 	int arr2[3][6];
 	int (*arr3)[6];
 	int matrixID;
-	sscanf(argv[1], "%d", &matrixID);
+	int key;
+	sscanf(argv[1], "%d", &key);
 
 	printf("Matrix 4x3:\n");
 	for(int i=0; i<4; i++){
@@ -22,7 +23,8 @@ int main(int argc, char* argv[]){
 			scanf("%d", &arr2[i][j]);
 		}
 	}
-	
+	if ((matrixID = shmget(key, 100, IPC_CREAT | 0666)) < 0)
+        	printf("smget returned -1\n");
 	if (!(arr3 = shmat(matrixID, NULL, 0))){
         	printf("Process shmat returned NULL\n");
     	}
@@ -38,5 +40,6 @@ int main(int argc, char* argv[]){
 		}
 		printf("\n");
 	}
+	printf("\n");
 	
 }
