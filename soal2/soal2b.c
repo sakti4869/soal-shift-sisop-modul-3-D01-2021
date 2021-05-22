@@ -51,6 +51,7 @@ int main(int argc, char* argv[]) {
 		printf("\n");
 	}	
 	printf("\n");
+	shmdt(init);
 	exit(0);
 	return 0;
 }
