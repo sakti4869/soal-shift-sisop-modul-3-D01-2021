@@ -2,10 +2,14 @@
 #include <sys/ipc.h> 
 #include <sys/shm.h> 
 
-int main(){
+int main(int argc, char* argv[]){
+
 	int arr1[4][3];
 	int arr2[3][6];
 	int (*arr3)[6];
+	int matrixID;
+	sscanf(argv[1], "%d", &matrixID);
+
 	printf("Matrix 4x3:\n");
 	for(int i=0; i<4; i++){
 		for(int j=0; j<3; j++){
@@ -18,16 +22,7 @@ int main(){
 			scanf("%d", &arr2[i][j]);
 		}
 	}
-
-	int matrixID;
-	key_t key=ftok(".", 'b');
-
-	FILE *keyid = fopen("key.txt", "w");
-	fprintf(keyid, "%d", key);
-	fclose(keyid);
-
-	if ((matrixID = shmget(key, 100, IPC_CREAT | 0666)) < 0)
-        	printf("smget returned -1\n");
+	
 	if (!(arr3 = shmat(matrixID, NULL, 0))){
         	printf("Process shmat returned NULL\n");
     	}
