@@ -13,29 +13,35 @@ int (*init)[6];
 int input[4][6];
 ll result[4][6];
 
-int main() {
+int main(int argc, char* argv[]) {
 	int matrixID;
-	key_t key=ftok(".", 'b');
-	
-	pid_t pid = fork();
-	if(pid == 0) execlp("./soal2a.o", "./soal2a.o", matrixID, NULL);
-	printf("here");
+	int key;
+	sscanf(argv[1], "%d", &key);
+
 	if ((matrixID = shmget(key, 100, IPC_CREAT | 0666)) < 0)
         	printf("smget returned -1\n");
 	if (!(init = shmat(matrixID, NULL, 0))){
         	printf("Process shmat returned NULL\n");
     	}
 	
-	
+	printf("Input Matrix 4x6\n");
 	for(int i=0; i<4; i++){
 		for(int j=0; j<6; j++){
 			scanf("%d", &input[i][j]);
 		}
 	}
+	
+	for(int i=0; i<4; i++){
+		for(int j=0; j<6; j++){
+			printf("%d", init[i][j]);
+		}
+		printf("\n");
+	}	
 
 	for(int i=1; i<=24; i++){
-		if(pthread_create(&(thrid[i]), NULL, factorial_thread, NULL));
+		if(pthread_create(&(thrid[i]), NULL, &factorial_thread, NULL));
 	}
+	printf("here");
 	for(int i=1; i<=24; i++) pthread_join(thrid[i],NULL);
 	exit(0);
 	return 0;
