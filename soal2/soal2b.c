@@ -19,37 +19,45 @@ int main(int argc, char* argv[]) {
 	sscanf(argv[1], "%d", &key);
 
 	if ((matrixID = shmget(key, 100, IPC_CREAT | 0666)) < 0)
-        	printf("smget returned -1\n");
+        	printf("shmget returned -1\n");
 	if (!(init = shmat(matrixID, NULL, 0))){
         	printf("Process shmat returned NULL\n");
     	}
 	
-	printf("Input Matrix 4x6\n");
+	printf("Input Matrix 4x6:\n");
 	for(int i=0; i<4; i++){
 		for(int j=0; j<6; j++){
 			scanf("%d", &input[i][j]);
 		}
 	}
-	
+	printf("\n");
+	printf("Previous Matrix 4x6:\n");
 	for(int i=0; i<4; i++){
 		for(int j=0; j<6; j++){
-			printf("%d", init[i][j]);
+			printf("%d ", init[i][j]);
 		}
 		printf("\n");
 	}	
-
-	for(int i=1; i<=24; i++){
+	printf("\n");
+	for(int i=0; i<24; i++){
 		if(pthread_create(&(thrid[i]), NULL, &factorial_thread, NULL));
 	}
-	printf("here");
-	for(int i=1; i<=24; i++) pthread_join(thrid[i],NULL);
+	for(int i=0; i<24; i++) pthread_join(thrid[i],NULL);
+	printf("Resulting Matrix 4x6:\n");
+	for(int i=0; i<4; i++){
+		for(int j=0; j<6; j++){
+			printf("%lld ", result[i][j]);
+		}
+		printf("\n");
+	}	
+	printf("\n");
 	exit(0);
 	return 0;
 }
 
 ll factorial(int a, int b){
 	ll res=1;
-	if(!a || !b) return 0;
+	if(!a || !b) res=0;
 	else if(a<b) for(int i=1; i<=a; i++) res *= i;
 	else for(int i=a; i>a-b; --i) res *= i;
 	return res;
@@ -65,6 +73,5 @@ void *factorial_thread(void *arg){
 			}
 		}
 	}
-
 
 }
