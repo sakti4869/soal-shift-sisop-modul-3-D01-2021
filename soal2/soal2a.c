@@ -40,6 +40,7 @@ int main(int argc, char* argv[]){
 		}
 		printf("\n");
 	}
+	shmdt(arr3);
 	printf("\n");
 	
 }
