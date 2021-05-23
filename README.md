@@ -144,6 +144,9 @@ void add(char *messages, int fd)
     fclose(fp);
 }
 ```
+Hasilnya:
+[![message-Image-1621775077188.jpg](https://i.postimg.cc/W3K9h15p/message-Image-1621775077188.jpg)](https://postimg.cc/r01GHM67)
+
 c. Tidak hanya itu, Keverk juga diminta membuat fitur agar client dapat menambah file baru ke dalam server. Direktori FILES memiliki struktur direktori di bawah ini : 
 
 Direktori FILES 
@@ -196,6 +199,9 @@ void add(char *messages, int fd)
     fclose(fp);
 }
 ```
+Hasilnya:
+[![message-Image-1621775362006.jpg](https://i.postimg.cc/SQ2THcKn/message-Image-1621775362006.jpg)](https://postimg.cc/7b4n2G04)
+
 d. Dan client dapat mendownload file yang telah ada dalam folder FILES di server, sehingga sistem harus dapat mengirim file ke client. Server harus melihat dari files.tsv untuk melakukan pengecekan apakah file tersebut valid. Jika tidak valid, maka mengirimkan pesan error balik ke client. Jika berhasil, file akan dikirim dan akan diterima ke client di folder client tersebut. 
 
 Contoh Command client
@@ -216,6 +222,9 @@ void download(char *filename, int fd)
     fclose(fp);
 }
 ```
+Hasilnya:
+[![message-Image-1621775651980.jpg](https://i.postimg.cc/gkyDPsb2/message-Image-1621775651980.jpg)](https://postimg.cc/qzRns87P)
+
 e. Setelah itu, client juga dapat menghapus file yang tersimpan di server. Akan tetapi, Keverk takut file yang dibuang adalah file yang penting, maka file hanya akan diganti namanya menjadi ‘old-NamaFile.ekstensi’. Ketika file telah diubah namanya, maka row dari file tersebut di file.tsv akan terhapus.
 
 Contoh Command Client:
@@ -259,6 +268,9 @@ void hapus(char *filename, int fd)
     }
 }
 ```
+Hasilnya:
+[![message-Image-1621775705926.jpg](https://i.postimg.cc/dQrR861j/message-Image-1621775705926.jpg)](https://postimg.cc/Dmfbhq1S)
+
 f.Client dapat melihat semua isi files.tsv dengan memanggil suatu perintah yang bernama see. Output dari perintah tersebut keluar dengan format. 
 
 Contoh Command Client :
@@ -315,6 +327,9 @@ void see(char *buf, int fd, bool isFind)
     fclose(src);
 }
 ```
+Hasilnya:
+[![message-Image-1621775778865.jpg](https://i.postimg.cc/MpP1WrPq/message-Image-1621775778865.jpg)](https://postimg.cc/5XzXgpWR)
+
 g. Aplikasi client juga dapat melakukan pencarian dengan memberikan suatu string. Hasilnya adalah semua nama file yang mengandung string tersebut. Format output seperti format output f.
 
 Contoh Client Command:
@@ -355,6 +370,9 @@ void see(char *buf, int fd, bool isFind)
     fclose(src);
 }
 ```
+Hasilnya:
+[![message-Image-1621775831069.jpg](https://i.postimg.cc/JnbyBTqy/message-Image-1621775831069.jpg)](https://postimg.cc/jwSqp4BK)
+
 h. Dikarenakan Keverk waspada dengan pertambahan dan penghapusan file di server, maka Keverk membuat suatu log untuk server yang bernama running.log. Contoh isi dari log ini adalah
 
 running.log
@@ -375,6 +393,9 @@ void runninglog(char *cmd, char *filename)
     fclose(fp);
 }
 ```
+Hasilnya:
+[![message-Image-1621775860947.jpg](https://i.postimg.cc/mgttSZjW/message-Image-1621775860947.jpg)](https://postimg.cc/jDYxxbBM)
+
 Kendala :
 
 Kendala pada saat pengerjaan nomor 1 adalah dengan waktu yang terbatas diminta untuk melakukan beberapa komponen yang membuat agak kesulitan karena diminta melakukan beberapa fitur dan kendala lainnya pada syntax yang selalu segmentation fault. Beberapa hal sudah saya lakukan dengan pembuatan thread sebagai akses untuk menyelesaikannya tetapi ada beberapa hal yang membuat socket tidak terhubung dengan sempurna dan menyebabkan beberap hal error. Sehingga belum menyelesaikannya secara sempurna.
