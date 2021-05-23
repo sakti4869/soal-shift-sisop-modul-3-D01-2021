@@ -350,6 +350,7 @@ running.log
 Tambah : File1.ektensi (id:pass)
 Hapus : File2.ektensi (id:pass)
 ``
+
 Jawaban : 
 Disini saya membuat sebuah fungsi yang bertujuan untuk mengecek apakah ada penambahan atau pengurangan data sehingga fungsi ini dimasukkan kedalam fungsi penambahan dan fungsi pengurangan untuk pengecekkan.
 ```
