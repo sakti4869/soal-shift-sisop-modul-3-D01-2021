@@ -46,7 +46,7 @@ id2:password2
 Jawaban : 
 
 Pada saat penggunaan yang menginginkan multi-connections maka kita membutuhkan thread sebagai alat untuk melakukan aktifitas tersebut. Oleh karena itu disini saya membuat dua buah thread untuk mengakomodasi hal tersebut untuk menyimpan username dan password.
-```
+```c
 //client
 int main(int argc, char const *argv[])
 {
@@ -64,7 +64,7 @@ int main(int argc, char const *argv[])
     return 0;
 }
 ```
-```
+```c
 //register
 void daftar(char *messages, int fd)
 {
@@ -115,7 +115,7 @@ b. Sistem memiliki sebuah database yang bernama files.tsv. Isi dari files.tsv in
 Jawaban : 
 
 Setiap memasukkan sesuatu akan dideteksi dan akan dimasukkan ke database yaitu files.tsv disemua fungsi terdapat semua open files.tsv untuk mencatat apakah data tersebut ditambahkan atau dihapus.
-```
+```c
 void add(char *messages, int fd)
 {
     char *dirName = "FILES";
@@ -170,7 +170,7 @@ Kemudian, dari aplikasi client akan dimasukan data buku tersebut (perlu diingat 
 Jawaban : 
 
 Disini perlu melakukan pengecekkan apakah data tersebut sudah ada atau belum. Apabila data tersebut belum ada maka akan dilakukan input data seperti diabawah ini.
-```
+```c
 void add(char *messages, int fd)
 {
     char *dirName = "FILES";
@@ -210,7 +210,7 @@ Contoh Command client
 Jawaban : 
 
 Disini saya membuat sebuah fungsi yang berguna untuk melakukan pengecekkan sehingga dibutuhkan pesan error apabila file tersebut tidak ada, dan memberikan peringatan juga agar file tersebut tidak duplikat.
-```
+```c
 void download(char *filename, int fd)
 {
     FILE *fp = fopen("files.tsv", "a+");
@@ -233,7 +233,7 @@ Contoh Command Client:
 Jawaban : 
 
 Disini saya membuat sebuah fungsi delete yang berguna untuk melakukan penghapusan data di files.tsv serta menambahkan history di running.log
-```
+```c
 void hapus(char *filename, int fd)
 {
     //buka file
@@ -295,7 +295,7 @@ Filepath :
 Jawaban : 
 
 Disini saya membuat sebuah fungsi yang bertujuan untuk melihat data di files.tsv untuk memastikan data tersebut ada dengan membuat fitur boolean sehingga bisa digunakan didua kondisi. Kondisi see dan find dengan menggunakan strstr
-```
+```c
 void see(char *buf, int fd, bool isFind)
 {
     int counter = 0;
@@ -338,7 +338,7 @@ Contoh Client Command:
 Jawaban : 
 
 Disini saya membuat sekaligus dengan fungsi see untuk upaya tidak doublenya pencarian. Karena disini mengecek data yang dengan menggunakan strstr.
-```
+```c
 void see(char *buf, int fd, bool isFind)
 {
     int counter = 0;
@@ -384,7 +384,7 @@ Hapus : File2.ektensi (id:pass)
 Jawaban : 
 
 Disini saya membuat sebuah fungsi yang bertujuan untuk mengecek apakah ada penambahan atau pengurangan data sehingga fungsi ini dimasukkan kedalam fungsi penambahan dan fungsi pengurangan untuk pengecekkan.
-```
+```c
 void runninglog(char *cmd, char *filename)
 {
     FILE *fp = fopen("running.log", "a+");
@@ -408,7 +408,7 @@ Crypto (kamu) adalah teman Loba. Suatu pagi, Crypto melihat Loba yang sedang kew
 **a.** Membuat program perkalian matrix (4x3 dengan 3x6) dan menampilkan hasilnya. Matriks nantinya akan berisi angka 1-20 (tidak perlu dibuat filter angka).
 
 Pertama, kita perlu menuliskan kode untuk menerima input array 4x3 dan 3x6 dari pengguna. Hal ini bisa dilakukan dengan menggunakan loop dan scanf.
-```
+```c
    int arr1[4][3];
    int arr2[3][6];
    
@@ -428,13 +428,13 @@ Pertama, kita perlu menuliskan kode untuk menerima input array 4x3 dan 3x6 dari 
 ```
 
 Karena nantinya kita memerlukan matrix hasil program ```soal2a.c``` untuk pengerjaan ```soal2b.c```, maka kita gunakan shared memory. Key dari shared memory sendiri bisa diinputkan saat program dijalankan. 
-```
+```c
 int key;
 sscanf(argv[1], "%d", &key);
 ```
 
 Kemudian, kita buat space untuk shared memory dengan key yang kita buat sebelumnya. KIta lakukan juga attach shared memory, agar isi arr3 bisa dimodifikasi dan digunakan program lain.
-```
+```c
 if ((matrixID = shmget(key, 100, IPC_CREAT | 0666)) < 0)
         	printf("smget returned -1\n");
 if (!(arr3 = shmat(matrixID, NULL, 0))){
@@ -443,7 +443,7 @@ if (!(arr3 = shmat(matrixID, NULL, 0))){
 ```
 
 Selanjutnya, kita perlu menampilkan hasil perkalian matrix 4x3 dan 3x6 yang diinputkan user ke monitor dan menyimpannya langsung ke space arr3.
-```
+```c
    printf("\nResulting Matrix 4x6:\n");
 	for(int i=0; i<4; i++){
 		for(int j=0; j<6; j++){
@@ -458,14 +458,14 @@ Selanjutnya, kita perlu menampilkan hasil perkalian matrix 4x3 dan 3x6 yang diin
 ```
 
 Setelah selesai, kita lakukan detach memory, agar shared memory dapat digunakan program lain.
-```
+```c
 shmdt(arr3);
 ```
 
 **b.** Membuat program dengan menggunakan matriks output dari program sebelumnya (program soal2a.c) (Catatan!: gunakan shared memory). Kemudian matriks tersebut akan dilakukan perhitungan dengan matrix baru (input user) sebagai berikut contoh perhitungan untuk matriks yang ada. Perhitungannya adalah setiap cel yang berasal dari matriks A menjadi angka untuk faktorial, lalu cel dari matriks B menjadi batas maksimal faktorialnya (dari paling besar ke paling kecil) (Catatan!: gunakan thread untuk perhitungan di setiap cel). 
 
 Ketentuan
-```
+```c
 If a >= b  --> a!/(a-b)!
 
 If b > a   --> a!
@@ -474,7 +474,7 @@ If 0       --> 0
 ```
 
 Pertama, kita lakukan attach shared memory yang berisi hasil matriks dari ```soal2a.c```. Kemudian, kita tampilkan matriks tersebut.
-```
+```c
 int matrixID;
 int key;
 sscanf(argv[1], "%d", &key);
@@ -492,7 +492,7 @@ for(int i=0; i<4; i++){
 ```
 
 Lalu kita minta input matriks baru 4x6 kepada user.
-```
+```c
 printf("Input Matrix 4x6:\n");
 for(int i=0; i<4; i++){
 	for(int j=0; j<6; j++){
@@ -503,7 +503,7 @@ printf("\n");
 ```
 
 Selanjutnya kita definisikan sebuah fungsi yang akan di threading.
-```
+```c
 void *factorial_thread(void *arg){
 	pthread_t id = pthread_self();
 	for(int i=0; i<4; i++){
@@ -517,7 +517,7 @@ void *factorial_thread(void *arg){
 ```
 
 Dan juga fungsi untuk melakukan perhitungan faktorial.
-```
+```c
 ll factorial(int a, int b){
 	ll res=1;
 	if(!a || !b) res=0;
@@ -528,15 +528,15 @@ ll factorial(int a, int b){
 ```
 
 Lalu di fungsi ```main``` dilakukan pembuatan thread.
-```
+```c
 for(int i=0; i<24; i++)
 	if(pthread_create(&(thrid[i]), NULL, &factorial_thread, NULL)) 
 		printf("Threading Error\n");
 for(int i=0; i<24; i++) pthread_join(thrid[i],NULL);
 ```
 
-Selnajutnya matriks hasil ditampilkan ke monitor, kemudian dilakukan detach shared memory.
-```
+Selanjutnya matriks hasil ditampilkan ke monitor, kemudian dilakukan detach shared memory.
+```c
 printf("Resulting Matrix 4x6:\n");
 for(int i=0; i<4; i++){
 	for(int j=0; j<6; j++){
@@ -551,14 +551,14 @@ shmdt(init);
 **c.** Karena takut lag dalam pengerjaannya membantu Loba, Crypto juga membuat program (soal2c.c) untuk mengecek 5 proses teratas apa saja yang memakan resource komputernya dengan command “ps aux | sort -nrk 3,3 | head -5” (Catatan!: Harus menggunakan IPC Pipes)
 
 Pertama, dibuat pipe pertama untuk ```ps aux```.
-```
+```c
 if (pipe(pipe1) == -1) {
     	perror("pipe 1 fail");
     	exit(1);
 }
 ```
 Kemudian dilakukan fork untuk exec ```ps aux```.
-```
+```c
 if ((pid = fork()) == -1) {
     	perror("fork 1 failed");
     	exit(1);
@@ -567,7 +567,7 @@ else if (pid == 0) exec1();
 ```
 
 Fungsi exec1() didefinisikan seperti berikut.
-```
+```c
 void exec1() {
   	dup2(pipe1[1], 1);			//input dari stdin, output ke pipe 1
 	
@@ -581,7 +581,7 @@ void exec1() {
 ```
 
 Kemudian kembali lagi ke main, kita buat pipe 2, dan kita lakukan fork.
-```
+```c
 if (pipe(pipe2) == -1) {
     	perror("pipe 2 failed");
     	exit(1);
@@ -595,7 +595,7 @@ else if (pid == 0) exec2();
 ```
 
 Fungsi exec 2 didefinisikan seperti berikut.
-```
+```c
 void exec2() { 
   	dup2(pipe1[0], 0); //input dari pipe 1
   	dup2(pipe2[1], 1); //output ke pipe 2
@@ -612,13 +612,13 @@ void exec2() {
 ```
 
 Kemudian kembali lagi ke main, tutup bagian pipe yang sudah tidak digunakan.
-```
+```c
 close(pipe1[0]);
 close(pipe1[1]);
 ```
 
 Kemudian kita buat pipe 3, dan kita lakukan fork.
-```
+```c
 if (pipe(pipe3) == -1) {
     	perror("pipe 3 failed");
     	exit(1);
@@ -632,7 +632,7 @@ else if (pid == 0) exec3();
 ```
 
 Selanjutnya, exec3 didefinisikan seperti berikut. Hasil akan ditampilkan ke monitor.
-```
+```c
 void exec3() {
 	//input dari pipe2, output ke stdout
   	dup2(pipe2[0], 0);
