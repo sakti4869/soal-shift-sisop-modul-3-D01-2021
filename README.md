@@ -31,6 +31,10 @@ M Haikal Aria Sakti 05111940000088
 David Ralphwaldo M 05111940000190
 
 ## Soal 1 ##
+Keverk adalah orang yang cukup ambisius dan terkenal di angkatannya. Sebelum dia menjadi ketua departemen di HMTC, dia pernah mengerjakan suatu proyek dimana keverk tersebut meminta untuk membuat server database buku. Proyek ini diminta agar dapat digunakan oleh pemilik aplikasi dan diharapkan bantuannya dari pengguna aplikasi ini.
+
+Di dalam proyek itu, Keverk diminta:
+
 a. Pada saat client tersambung dengan server, terdapat dua pilihan pertama, yaitu register dan login. Jika memilih register, client akan diminta input id dan passwordnya untuk dikirimkan ke server. User juga dapat melakukan login. Login berhasil jika id dan password yang dikirim dari aplikasi client sesuai dengan list akun yang ada didalam aplikasi server. Sistem ini juga dapat menerima multi-connections. Koneksi terhitung ketika aplikasi client tersambung dengan server. Jika terdapat 2 koneksi atau lebih maka harus menunggu sampai client pertama keluar untuk bisa melakukan login dan mengakses aplikasinya. Keverk menginginkan lokasi penyimpanan id dan password pada file bernama akun.txt dengan format :
 
 akun.txt
@@ -38,8 +42,99 @@ akun.txt
 id:password
 id2:password2
 ``
+Jawaban : 
+Pada saat penggunaan yang menginginkan multi-connections maka kita membutuhkan thread sebagai alat untuk melakukan aktifitas tersebut. Oleh karena itu disini saya membuat dua buah thread untuk mengakomodasi hal tersebut untuk menyimpan username dan password.
+
+//client
+int main(int argc, char const *argv[])
+{
+    pthread_t tid[2];
+    int fdc = create_socket();
+    //bisa menghandle client banyak
+    //minta masukka username
+    pthread_create(&(tid[0]), NULL, &cekoutput, (void *) &fdc);
+    //minta masukkan email
+    pthread_create(&(tid[1]), NULL, &cekinput, (void *) &fdc);
+    //joinkan
+    pthread_join(tid[0], NULL);
+    pthread_join(tid[1], NULL);
+    close(fdc);
+    return 0;
+}
+
+//register
+void daftar(char *messages, int fd)
+{
+    char id[300], password[300];
+    FILE *fp = fopen("akun.txt", "a+");
+
+    if (validasi(fd, id, password) != 0) {
+        if (sudahregister(fp, id)) {
+            send(fd, "Username tersebut sudah ada\n", SIZE_BUFFER, 0);
+        } else {
+            fprintf(fp, "%s:%s\n", id, password);
+            send(fd, "Register akun berhasil\n", SIZE_BUFFER, 0);
+        }
+    }
+    fclose(fp);
+}
+
+//login
+void login(char *messages, int fd)
+{
+    if (socketawal != -1) {
+        send(fd, "Server sedang sibuk. Mohon menunggu\n", SIZE_BUFFER, 0);
+        return;
+    }
+    //buka akun
+    char id[300], password[300];
+    FILE *fp = fopen("akun.txt", "a+");
+    //cek apakah berhasil
+    if (validasi(fd, id, password) != 0) {
+        if (loginberhasil(fp, id, password)) {
+            send(fd, "Login berhasil!\n", SIZE_BUFFER, 0);
+            socketawal = fd;
+            strcpy(validator[0], id);
+            strcpy(validator[1], password);
+        } else {
+            send(fd, "Username atau password salah!\n", SIZE_BUFFER, 0);
+        }
+    }
+    fclose(fp);
+}
 
 b. Sistem memiliki sebuah database yang bernama files.tsv. Isi dari files.tsv ini adalah path file saat berada di server, publisher, dan tahun publikasi. Setiap penambahan dan penghapusan file pada folder file yang bernama  FILES pada server akan memengaruhi isi dari files.tsv. Folder FILES otomatis dibuat saat server dijalankan.
+
+Jawaban : 
+Setiap memasukkan sesuatu akan dideteksi dan akan dimasukkan ke database yaitu files.tsv disemua fungsi terdapat semua open files.tsv untuk mencatat apakah data tersebut ditambahkan atau dihapus.
+
+void add(char *messages, int fd)
+{
+    char *dirName = "FILES";
+    char publisher[300], year[300], client_path[300];
+    sleep(0.001);
+    if (ambilinput(fd, "Publisher: ", publisher) == 0) return;
+    if (ambilinput(fd, "Tahun Publikasi: ", year) == 0) return;
+    if (ambilinput(fd, "Filepath: ", client_path) == 0) return;
+
+    FILE *fp = fopen("files.tsv", "a+");
+    char *fileName = ceknamafile(client_path);
+
+    if (sudahdownload(fp, fileName)) {
+        send(fd, "File yang anda upload sudah ada\n", SIZE_BUFFER, 0);
+    } else {
+        send(fd, "Memulai mengirimkan file\n", SIZE_BUFFER, 0);
+        mkdir(dirName, 0777);
+        if (masukkanfile(fd, dirName, fileName) == 0) {
+            fprintf(fp, "%s\t%s\t%s\n", client_path, publisher, year);
+            printf("File berhasil dikirimkan\n");
+            runninglog("add", fileName);
+        } else {
+            printf("Error occured when receiving file\n");
+        }
+    }
+    fclose(fp);
+}
 
 c. Tidak hanya itu, Keverk juga diminta membuat fitur agar client dapat menambah file baru ke dalam server. Direktori FILES memiliki struktur direktori di bawah ini : 
 
@@ -61,15 +156,97 @@ Filepath:
 ``
 Kemudian, dari aplikasi client akan dimasukan data buku tersebut (perlu diingat bahwa Filepath ini merupakan path file yang akan dikirim ke server). Lalu client nanti akan melakukan pengiriman file ke aplikasi server dengan menggunakan socket. Ketika file diterima di server, maka row dari files.tsv akan bertambah sesuai dengan data terbaru yang ditambahkan.
 
+Jawaban : 
+Disini perlu melakukan pengecekkan apakah data tersebut sudah ada atau belum. Apabila data tersebut belum ada maka akan dilakukan input data seperti diabawah ini.
+
+void add(char *messages, int fd)
+{
+    char *dirName = "FILES";
+    char publisher[300], year[300], client_path[300];
+    sleep(0.001);
+    if (ambilinput(fd, "Publisher: ", publisher) == 0) return;
+    if (ambilinput(fd, "Tahun Publikasi: ", year) == 0) return;
+    if (ambilinput(fd, "Filepath: ", client_path) == 0) return;
+
+    FILE *fp = fopen("files.tsv", "a+");
+    char *fileName = ceknamafile(client_path);
+
+    if (sudahdownload(fp, fileName)) {
+        send(fd, "File yang anda upload sudah ada\n", SIZE_BUFFER, 0);
+    } else {
+        send(fd, "Memulai mengirimkan file\n", SIZE_BUFFER, 0);
+        mkdir(dirName, 0777);
+        if (masukkanfile(fd, dirName, fileName) == 0) {
+            fprintf(fp, "%s\t%s\t%s\n", client_path, publisher, year);
+            printf("File berhasil dikirimkan\n");
+            runninglog("add", fileName);
+        } else {
+            printf("Error occured when receiving file\n");
+        }
+    }
+    fclose(fp);
+}
+
 d. Dan client dapat mendownload file yang telah ada dalam folder FILES di server, sehingga sistem harus dapat mengirim file ke client. Server harus melihat dari files.tsv untuk melakukan pengecekan apakah file tersebut valid. Jika tidak valid, maka mengirimkan pesan error balik ke client. Jika berhasil, file akan dikirim dan akan diterima ke client di folder client tersebut. 
 
 Contoh Command client
 ``download TEMPfile.pdf``
 
+Jawaban : 
+Disini saya membuat sebuah fungsi yang berguna untuk melakukan pengecekkan sehingga dibutuhkan pesan error apabila file tersebut tidak ada, dan memberikan peringatan juga agar file tersebut tidak duplikat.
+
+void download(char *filename, int fd)
+{
+    FILE *fp = fopen("files.tsv", "a+");
+    if (sudahdownload(fp, filename)) {
+        kirim(fd, filename);
+    } else {
+        send(fd, "File tersebut tidak ada\n", SIZE_BUFFER, 0);
+    }
+    fclose(fp);
+}
+
 e. Setelah itu, client juga dapat menghapus file yang tersimpan di server. Akan tetapi, Keverk takut file yang dibuang adalah file yang penting, maka file hanya akan diganti namanya menjadi ‘old-NamaFile.ekstensi’. Ketika file telah diubah namanya, maka row dari file tersebut di file.tsv akan terhapus.
 
 Contoh Command Client:
 ``delete TEMPfile.pdf``
+
+Jawaban : 
+Disini saya membuat sebuah fungsi delete yang berguna untuk melakukan penghapusan data di files.tsv serta menambahkan history di running.log
+
+void hapus(char *filename, int fd)
+{
+    //buka file
+    FILE *fp = fopen("files.tsv", "a+");
+    char db[300], currFilePath[300], publisher[300], year[300];
+    if (sudahdownload(fp, filename)) {
+        rewind(fp);
+        FILE *tmp_fp = fopen("temp.tsv", "a+");
+        //buat sebuah temp supaya pada saat pertukaran data tidak berubah2
+        while (fgets(db, SIZE_BUFFER, fp)) {
+            sscanf(db, "%s\t%s\t%s", currFilePath, publisher, year);
+            if (strcmp(ceknamafile(currFilePath), filename) != 0) { 
+                fprintf(tmp_fp, "%s", db);
+            }
+            memset(db, 0, SIZE_BUFFER);
+        }
+        fclose(tmp_fp);
+        fclose(fp);
+        remove("files.tsv");
+        rename("temp.tsv", "files.tsv");
+        char deletedFileName[300];
+        sprintf(deletedFileName, "FILES/%s", filename);
+        char newFileName[300];
+        sprintf(newFileName, "FILES/old-%s", filename);
+        rename(deletedFileName, newFileName);
+        send(fd, "File tersebut berhasil dihapus\n", SIZE_BUFFER, 0);
+        runninglog("delete", filename);
+    } 
+    else {
+        send(fd, "File gagal didownload\n", SIZE_BUFFER, 0);
+        fclose(fp);
+    }
+}
 
 f.Client dapat melihat semua isi files.tsv dengan memanggil suatu perintah yang bernama see. Output dari perintah tersebut keluar dengan format. 
 
@@ -91,11 +268,78 @@ Tahun publishing:
 Ekstensi File : 
 Filepath : 
 ``
+Jawaban : 
+Disini saya membuat sebuah fungsi yang bertujuan untuk melihat data di files.tsv untuk memastikan data tersebut ada dengan membuat fitur boolean sehingga bisa digunakan didua kondisi. Kondisi see dan find dengan menggunakan strstr
+
+void see(char *buf, int fd, bool isFind)
+{
+    int counter = 0;
+    FILE *src = fopen("files.tsv", "r");
+    if (!src) {
+        write(fd, "Files.tsv not found\n", SIZE_BUFFER);
+        return;
+    }
+
+    char temp[300 + 85], namafile[300/3], ext[5],
+        filepath[300/3], publisher[300/3], year[10];
+        
+    while (fscanf(src, "%s\t%s\t%s", filepath, publisher, year) != EOF) {
+        pemisahfile(filepath, namafile, ext);
+        if (isFind && strstr(namafile, buf) == NULL) continue;
+        counter++;
+
+        sprintf(temp, 
+            "Nama: %s\nPublisher: %s\nTahun publishing: %s\nEkstensi File: %s\nFilepath: %s\n\n",
+            namafile, publisher, year, ext, filepath
+        );
+        write(fd, temp, SIZE_BUFFER);
+        sleep(0.001);
+    }
+    if(counter == 0) {
+        if (isFind) write(fd, "perintah tersebut tidak ada di files.tsv\n", SIZE_BUFFER);
+        else write(fd, "Data tidak ada di database files.tsv\n", SIZE_BUFFER);
+    } 
+    fclose(src);
+}
 
 g. Aplikasi client juga dapat melakukan pencarian dengan memberikan suatu string. Hasilnya adalah semua nama file yang mengandung string tersebut. Format output seperti format output f.
 
 Contoh Client Command:
 ``find TEMP``
+
+Jawaban : 
+Disini saya membuat sekaligus dengan fungsi see untuk upaya tidak doublenya pencarian. Karena disini mengecek data yang dengan menggunakan strstr.
+
+void see(char *buf, int fd, bool isFind)
+{
+    int counter = 0;
+    FILE *src = fopen("files.tsv", "r");
+    if (!src) {
+        write(fd, "Files.tsv not found\n", SIZE_BUFFER);
+        return;
+    }
+
+    char temp[300 + 85], namafile[300/3], ext[5],
+        filepath[300/3], publisher[300/3], year[10];
+        
+    while (fscanf(src, "%s\t%s\t%s", filepath, publisher, year) != EOF) {
+        pemisahfile(filepath, namafile, ext);
+        if (isFind && strstr(namafile, buf) == NULL) continue;
+        counter++;
+
+        sprintf(temp, 
+            "Nama: %s\nPublisher: %s\nTahun publishing: %s\nEkstensi File: %s\nFilepath: %s\n\n",
+            namafile, publisher, year, ext, filepath
+        );
+        write(fd, temp, SIZE_BUFFER);
+        sleep(0.001);
+    }
+    if(counter == 0) {
+        if (isFind) write(fd, "perintah tersebut tidak ada di files.tsv\n", SIZE_BUFFER);
+        else write(fd, "Data tidak ada di database files.tsv\n", SIZE_BUFFER);
+    } 
+    fclose(src);
+}
 
 h. Dikarenakan Keverk waspada dengan pertambahan dan penghapusan file di server, maka Keverk membuat suatu log untuk server yang bernama running.log. Contoh isi dari log ini adalah
 
@@ -104,6 +348,16 @@ running.log
 Tambah : File1.ektensi (id:pass)
 Hapus : File2.ektensi (id:pass)
 ``
+Jawaban : 
+Disini saya membuat sebuah fungsi yang bertujuan untuk mengecek apakah ada penambahan atau pengurangan data sehingga fungsi ini dimasukkan kedalam fungsi penambahan dan fungsi pengurangan untuk pengecekkan.
+
+void runninglog(char *cmd, char *filename)
+{
+    FILE *fp = fopen("running.log", "a+");
+    cmd = (strcmp(cmd, "add") == 0) ? "Tambah" : "Hapus";
+    fprintf(fp, "%s : %s (%s:%s)\n", cmd, filename, validator[0], validator[1]);
+    fclose(fp);
+}
 
 ## Soal 2 ##
 
