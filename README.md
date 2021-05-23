@@ -635,20 +635,179 @@ File 2 : Sad, gagal :( (jika gagal)
 File 3 : Berhasil Dikategorikan
 ```
 
-![Soal3A1](https://i.postimg.cc/MGRMrWKV/1.png)
-![Soal3A2](https://i.postimg.cc/vTSZZjZG/a0.png)
-![Soal3A3](https://i.postimg.cc/XqZ0Qvn0/a1.png)
-![Soal3A4](https://i.postimg.cc/QtT2TymX/a2.png)
-
 ### Cara Pengerjaan ###
 
-1. Looping untuk memproses semua file yang ada dalam array argv.
-2. Untuk setiap file dibuat sebuah thread yang disimpan dalam array fileThread dan mempassing fungsi moveFile dan nama filenya sebagai argumen untuk fungsi moveFile.
-3. Setelah dibuat sebanyak FILES_MAX, program akan menunggu agar semua thread selesai, kemudian melakukan join thread.
-4. Dalam fungsi moveFile, pertama dicek apabila filenya ada atau tidak, jika tidak ada maka gagal.
-5. Kemudian fungsi mengecek apabila file tersebut merupakan file biasa, file hidden, atau file dengan tipe yang unknown.
-6. Jika filenya merupakan file biasa, maka akan dibuatkan folder sesuai ekstensinya, jika filenya hidden maka akan dibuatkan folder Hidden, jika filenya Unknown dibuatkan folder Unknown.
-7. Setelah itu file dipindahkan.
+Pertama kita mengecek jika argumen pertama yang diberikan adalah '-f'. Jika iya maka akan selanjutnya dicek apabila diberikan nama - nama file yang ingin dikategorikan atau tidak. Jika tidak diberikan satu pun file untuk dikategorikan maka program akan keluar.
+
+```c
+if (!strcmp(argv[1], "-f")) {
+	if (argc < 3) {
+		printf("Kurang argumen!\n");
+		return 1;
+	}
+}
+```
+
+Setelah itu setiap file yang diberikan akan diproses. Pertama dibuat thread untuk mengkategorikan file tersebut. Jika fileIndex sama dengan FILES_MAX (berarti jumlah maksimum file yang bisa diproses sudah tercapai), maka akan dilakukan join semua thread sebelum memproses file - file berikutnya.
+
+Thread yang dibuat akan memanggil fungsi `moveFile` dan akan diberikan argumen yaitu nama dari file yang diproses. `argv[argc - 1 - i]` akan memproses file dari file yang terakhir agar output nama - nama file sesuai dengan urutan inputnya.
+
+```c
+int i;
+int fileCount = argc - 2; // ./soal3 -f gak dihitung
+
+for (i = 0; i < fileCount; i++) {
+	pthread_create(&fileThread[fileIndex], NULL, moveFile, (void *) argv[argc - 1 - i]);
+	fileIndex++;
+	
+	if (fileIndex == FILES_MAX) {
+		int j;
+		for (j = 0; j < fileIndex; j++)
+			pthread_join(fileThread[j], NULL);
+
+		fileIndex = 0;
+	}
+}
+```
+
+Jika jumlah maksimum file yang bisa diproses belum tercapai, maka join thread akan dilakukan setelah loop untuk mengkategorikan file selesai.
+
+```c
+for (i = 0; i < fileIndex; i++) {
+	pthread_join(fileThread[i], NULL);
+}
+```
+
+Berikut adalah fungsi `moveFile`:
+
+```c
+void* moveFile(void* arg)
+{
+	// Get file name
+
+	char* fileName = (char *) arg;
+
+	// Cek filenya ada atau gak
+
+	if (access(fileName, F_OK) != 0) {
+		if (mode == 0) {
+			printf("%s : Sad, gagal :(\n", fileName);
+			berhasil = 0;
+		}
+
+		return NULL;
+	}
+
+	// File name tanpa path
+
+	char* fileNameNoPath = (char* ) arg;
+	char* temp = fileNameNoPath;
+
+	while (1) { // Skip semua tanda /
+		if (*temp == '\0') break;
+
+		if (*temp == '/')
+			fileNameNoPath = temp + 1;
+
+		temp++;
+	}
+
+	// Check tipe file
+
+	int tipeFile = 0; // 0 - File biasa, 1 - File hidden, 2 - File unknown
+
+	if (fileNameNoPath[0] == '.') // Check kalo filenya hidden
+		tipeFile = 1;
+
+	if (strchr(fileNameNoPath, '.') == NULL) // Check kalo filenya unknown
+		tipeFile = 2;
+
+	// Buat folder tergantung tipe filenya terus pindahin filenya
+
+	if (tipeFile == 0) { // Kalo filenya file biasa
+		// Cek ekstensi filenya
+
+		char fileExt[20];
+		strcpy(fileExt, strchr(fileNameNoPath, '.') + 1);
+
+		// Buat ekstensi file case - insensitive
+
+		int i;
+		for (i = 0; i < strlen(fileExt); i++)
+			fileExt[i] = tolower(fileExt[i]);
+
+		if (access(fileExt, F_OK) != 0) // Directory blom ada
+			if (mkdir(fileExt, 0777) != 0) { // Kalo gagal buat direktori
+				if (mode == 0) printf("%s : Sad, gagal :(\n", fileName);
+				berhasil = 0;
+
+				return NULL;
+			}
+
+		// File name dengan path baru
+
+		char fileNameNewPath[200]; // Nama file dengan folder baru
+		strcpy(fileNameNewPath, fileExt);
+		strcat(fileNameNewPath, "/");
+		strcat(fileNameNewPath, fileNameNoPath);
+
+		if (rename(fileName, fileNameNewPath) == 0)
+			if (mode == 0) printf("%s : Berhasil Dikategorikan\n", fileName);
+		else {
+			if (mode == 0) printf("%s : Sad, gagal :(\n", fileName);
+			return NULL;
+		}
+	}
+
+	if (tipeFile == 1) { // File hidden
+		if (access("Hidden", F_OK) != 0) // Direktori belom ada
+			if (mkdir("Hidden", 0777) != 0) { // Gagal buat direktori
+				if (mode == 0) printf("%s : Sad, gagal :(\n", fileName);
+				berhasil = 0;
+
+				return NULL;
+			}
+
+		// File name dengan path baru
+
+		char fileNameNewPath[200]; // Nama file dengan folder baru
+		strcpy(fileNameNewPath, "Hidden/");
+		strcat(fileNameNewPath, fileNameNoPath + 1); // Skip dot diawal biar gak hidden
+
+		if (rename(fileName, fileNameNewPath) == 0)
+			if (mode == 0) printf("%s : Berhasil Dikategorikan\n", fileName);
+		else {
+			if (mode == 0) printf("%s : Sad, gagal :(\n", fileName);
+			return NULL;
+		}
+	}
+
+	if (tipeFile == 2) { // File unknown
+		if (access("Unknown", F_OK) != 0) // Direktori blom ada
+			if (mkdir("Unknown", 0777) != 0) { // Gagal buat direktori
+				if (mode == 0) printf("%s : Sad, gagal :(\n", fileName);
+				berhasil = 0;
+
+				return NULL;
+			}
+
+		// File name dengan path baru
+
+		char fileNameNewPath[200]; // Nama file dengan folder baru
+		strcpy(fileNameNewPath, "Unknown/");
+		strcat(fileNameNewPath, fileNameNoPath);
+
+		if (rename(fileName, fileNameNewPath) == 0)
+			if (mode == 0) printf("%s : Berhasil Dikategorikan\n", fileName);
+		else {
+			if (mode == 0) printf("%s : Sad, gagal :(\n", fileName);
+			return NULL;
+		}
+	}
+}
+```
+
+Fungsi moveFile akan membedakan antara file biasa yang diketahui ekstensinya, file tersembunyi, dan file yang tidak diketahui ekstensinya.
 
 ### Kendala ###
 
@@ -671,10 +830,6 @@ Jika berhasil, print “Direktori sukses disimpan!”
 Jika gagal, print “Yah, gagal disimpan :(“
 ```
 
-![Soal3B1](https://i.postimg.cc/mgZhyQ0x/2.png)
-![Soal3B2](https://i.postimg.cc/TY3XkCYc/b0.png)
-![Soal3B3](https://i.postimg.cc/fygqq7BH/b1.png)
-
 ### Cara Pengerjaan ###
 
 1. Membaca isi direktori yang diberikan sebagai argumen ke fungsi moveDir.
@@ -694,8 +849,6 @@ $ ./soal3 \*
 Opsi ini akan mengkategorikan seluruh file yang ada di working directory ketika
 menjalankan program C tersebut.
 
-![Soal3C1](https://i.postimg.cc/mgZhyQ0x/2.png)
-
 ### Cara Pengerjaan ###
 
 1. Hampir sama dengan no b, hanya saja ketika awal dipanggil mempassing path "." untuk fungsi moveDir.
@@ -705,9 +858,6 @@ menjalankan program C tersebut.
 Tidak ada kendala.
 
 **(d)** Semua file harus berada di dalam folder, jika terdapat file yang tidak memiliki ekstensi, file disimpan dalam folder “Unknown”. Jika file hidden, masuk folder “Hidden”.
-
-![Soal3D1](https://i.postimg.cc/vTSZZjZG/a0.png)
-![Soal3D2](https://i.postimg.cc/LXxxhBKH/hidden.png)
 
 ### Cara Pengerjaan ###
 
@@ -719,8 +869,7 @@ Tidak ada kendala.
 
 **(e)** Setiap 1 file yang dikategorikan dioperasikan oleh 1 thread agar bisa berjalan secara paralel sehingga proses kategori bisa berjalan lebih cepat.
 
-![Soal3E1](https://i.postimg.cc/g2bHzBXV/pakethread1.png)
-![Soal3E2](https://i.postimg.cc/fygqq7BH/b1.png)
+
 
 ### Cara Pengerjaan ###
 
