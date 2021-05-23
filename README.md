@@ -269,6 +269,7 @@ Tahun publishing:
 Ekstensi File : 
 Filepath : 
 ``
+
 Jawaban : 
 Disini saya membuat sebuah fungsi yang bertujuan untuk melihat data di files.tsv untuk memastikan data tersebut ada dengan membuat fitur boolean sehingga bisa digunakan didua kondisi. Kondisi see dan find dengan menggunakan strstr
 ```
