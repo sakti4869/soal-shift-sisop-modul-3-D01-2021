@@ -131,7 +131,22 @@ Pertama, kita perlu menuliskan kode untuk menerima input array 4x3 dan 3x6 dari 
 	}
 ```
 
-Selanjutnya, kita perlu menampilkan hasil perkalian matrix 4x3 dan 3x6 yang diinputkan user ke monitor.
+Karena nantinya kita memerlukan matrix hasil program ```soal2a.c``` untuk pengerjaan ```soal2b.c```, maka kita gunakan shared memory. Key dari shared memory sendiri bisa diinputkan saat program dijalankan. 
+```
+int key;
+sscanf(argv[1], "%d", &key);
+```
+
+Kemudian, kita buat space untuk shared memory dengan key yang kita buat sebelumnya. KIta lakukan juga attach shared memory, agar isi arr3 bisa dimodifikasi dan digunakan program lain.
+```
+if ((matrixID = shmget(key, 100, IPC_CREAT | 0666)) < 0)
+        	printf("smget returned -1\n");
+if (!(arr3 = shmat(matrixID, NULL, 0))){
+         printf("Process shmat returned NULL\n");
+}
+```
+
+Selanjutnya, kita perlu menampilkan hasil perkalian matrix 4x3 dan 3x6 yang diinputkan user ke monitor dan menyimpannya langsung ke space arr3.
 ```
    printf("\nResulting Matrix 4x6:\n");
 	for(int i=0; i<4; i++){
@@ -146,37 +161,193 @@ Selanjutnya, kita perlu menampilkan hasil perkalian matrix 4x3 dan 3x6 yang diin
 	}
 ```
 
-Karena nantinya kita memerlukan matrix hasil program ```soal2a.c``` untuk pengerjaan ```soal2b.c```, maka kita gunakan shared memory. Pertama, kita buat key untuk mengakses shared memory tersebut.
+Setelah selesai, kita lakukan detach memory, agar shared memory dapat digunakan program lain.
 ```
-key_t key = ftok(".", 'b');
-```
-
-Selanjutnya, key disimpan di sebuah file ```key.txt``` agar bisa diakses program ```soal2b.c```.
-```
-FILE *keyid = fopen("key.txt", "w");
-fprintf(keyid, "%d", key);
-fclose(keyid);
-```
-
-Kemudian, kita buat space untuk shared memory dengan key yang kita buat sebelumnya. KIta lakukan juga attach shared memory, agar isi arr3 bisa dimodifikasi dan digunakan program lain.
-```
-if ((matrixID = shmget(key, 100, IPC_CREAT | 0666)) < 0)
-        	printf("smget returned -1\n");
-if (!(arr3 = shmat(matrixID, NULL, 0))){
-         printf("Process shmat returned NULL\n");
-}
+shmdt(arr3);
 ```
 
 **b.** Membuat program dengan menggunakan matriks output dari program sebelumnya (program soal2a.c) (Catatan!: gunakan shared memory). Kemudian matriks tersebut akan dilakukan perhitungan dengan matrix baru (input user) sebagai berikut contoh perhitungan untuk matriks yang ada. Perhitungannya adalah setiap cel yang berasal dari matriks A menjadi angka untuk faktorial, lalu cel dari matriks B menjadi batas maksimal faktorialnya (dari paling besar ke paling kecil) (Catatan!: gunakan thread untuk perhitungan di setiap cel). 
 
-Ketentuan		
+Ketentuan
+```
 If a >= b  --> a!/(a-b)!
 
 If b > a   --> a!
 
 If 0       --> 0
+```
+
+Pertama, kita lakukan attach shared memory yang berisi hasil matriks dari ```soal2a.c```. Kemudian, kita tampilkan matriks tersebut.
+```
+int matrixID;
+int key;
+sscanf(argv[1], "%d", &key);
+
+if ((matrixID = shmget(key, 100, IPC_CREAT | 0666)) < 0) printf("shmget returned -1\n");
+if (!(init = shmat(matrixID, NULL, 0))) printf("Process shmat returned NULL\n");
+
+printf("Previous Matrix 4x6:\n");
+for(int i=0; i<4; i++){
+	for(int j=0; j<6; j++){
+		printf("%d ", init[i][j]);
+	}
+	printf("\n");
+}
+```
+
+Lalu kita minta input matriks baru 4x6 kepada user.
+```
+printf("Input Matrix 4x6:\n");
+for(int i=0; i<4; i++){
+	for(int j=0; j<6; j++){
+		scanf("%d", &input[i][j]);
+	}
+}
+printf("\n");
+```
+
+Selanjutnya kita definisikan sebuah fungsi yang akan di threading.
+```
+void *factorial_thread(void *arg){
+	pthread_t id = pthread_self();
+	for(int i=0; i<4; i++){
+		for(int j=0; j<6; j++){
+			if(pthread_equal(id, thrid[i])) 
+				result[i][j] = factorial(init[i][j], input[i][j]);
+		}
+	}
+
+}
+```
+
+Dan juga fungsi untuk melakukan perhitungan faktorial.
+```
+ll factorial(int a, int b){
+	ll res=1;
+	if(!a || !b) res=0;
+	else if(a<b) for(int i=1; i<=a; i++) res *= i;
+	else for(int i=a; i>a-b; --i) res *= i;
+	return res;
+}
+```
+
+Lalu di fungsi ```main``` dilakukan pembuatan thread.
+```
+for(int i=0; i<24; i++)
+	if(pthread_create(&(thrid[i]), NULL, &factorial_thread, NULL)) 
+		printf("Threading Error\n");
+for(int i=0; i<24; i++) pthread_join(thrid[i],NULL);
+```
+
+Selnajutnya matriks hasil ditampilkan ke monitor, kemudian dilakukan detach shared memory.
+```
+printf("Resulting Matrix 4x6:\n");
+for(int i=0; i<4; i++){
+	for(int j=0; j<6; j++){
+		printf("%lld ", result[i][j]);
+	}
+	printf("\n");
+}	
+printf("\n");
+shmdt(init);
+```
 
 **c.** Karena takut lag dalam pengerjaannya membantu Loba, Crypto juga membuat program (soal2c.c) untuk mengecek 5 proses teratas apa saja yang memakan resource komputernya dengan command “ps aux | sort -nrk 3,3 | head -5” (Catatan!: Harus menggunakan IPC Pipes)
+
+Pertama, dibuat pipe pertama untuk ```ps aux```.
+```
+if (pipe(pipe1) == -1) {
+    	perror("pipe 1 fail");
+    	exit(1);
+}
+```
+Kemudian dilakukan fork untuk exec ```ps aux```.
+```
+if ((pid = fork()) == -1) {
+    	perror("fork 1 failed");
+    	exit(1);
+} 
+else if (pid == 0) exec1();
+```
+
+Fungsi exec1() didefinisikan seperti berikut.
+```
+void exec1() {
+  	dup2(pipe1[1], 1);			//input dari stdin, output ke pipe 1
+	
+  	close(pipe1[0]); close(pipe1[1]);	//menutup bagian pipe yang tidak digunakan
+
+  	execlp("ps", "ps", "aux", NULL);
+
+  	perror("exec ps fail");			//pesan error jika exec fail dan melanjutkan fungsi dibawahnya
+  	_exit(1);
+}
+```
+
+Kemudian kembali lagi ke main, kita buat pipe 2, dan kita lakukan fork.
+```
+if (pipe(pipe2) == -1) {
+    	perror("pipe 2 failed");
+    	exit(1);
+}
+	
+if ((pid = fork()) == -1) {
+	perror("fork 2 failed");
+	exit(1);
+} 
+else if (pid == 0) exec2();
+```
+
+Fungsi exec 2 didefinisikan seperti berikut.
+```
+void exec2() { 
+  	dup2(pipe1[0], 0); //input dari pipe 1
+  	dup2(pipe2[1], 1); //output ke pipe 2
+	
+	//menutup bagian pipe yang tidak digunakan
+  	close(pipe1[0]); close(pipe1[1]);
+  	close(pipe2[0]); close(pipe2[1]);
+
+  	execlp("sort", "sort", "-nrk", "3,3", NULL);
+
+  	perror("exec sort failed");
+ 	_exit(1);
+}
+```
+
+Kemudian kembali lagi ke main, tutup bagian pipe yang sudah tidak digunakan.
+```
+close(pipe1[0]);
+close(pipe1[1]);
+```
+
+Kemudian kita buat pipe 3, dan kita lakukan fork.
+```
+if (pipe(pipe3) == -1) {
+    	perror("pipe 3 failed");
+    	exit(1);
+}
+	
+if ((pid = fork()) == -1) {
+	perror("fork 3 failed");
+	exit(1);
+} 
+else if (pid == 0) exec3();
+```
+
+Selanjutnya, exec3 didefinisikan seperti berikut. Hasil akan ditampilkan ke monitor.
+```
+void exec3() {
+	//input dari pipe2, output ke stdout
+  	dup2(pipe2[0], 0);
+	//menutup pipe yang tidak digunakan
+  	close(pipe2[0]); close(pipe2[1]);
+
+  	execlp("head", "head", "-5", NULL);
+  	perror("EXEC HEAD FAIL");
+  	_exit(1);
+}
+```
 
 ## Soal 3 ##
 
