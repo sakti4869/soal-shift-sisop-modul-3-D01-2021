@@ -832,9 +832,112 @@ Jika gagal, print “Yah, gagal disimpan :(“
 
 ### Cara Pengerjaan ###
 
-1. Membaca isi direktori yang diberikan sebagai argumen ke fungsi moveDir.
-2. Memindahkan semua file yang ada dalam direktori tersebut dengan memanggil fungsi moveFile dan mempassing path dan nama file tersebut sebagai argumennya.
-3. Setelah semua file dalam direktori dipindahkan, maka fungsi akan memanggil moveDir dengan argumen path direktori lain.
+Pertama akan dicek jika argumen pertama yang diberikan adalah `-d`
+
+```c
+if (!strcmp(argv[1], "-d")) {
+	if (argc < 3) {
+		printf("Kurang argumen!\n");
+		return 1;
+	}
+
+	mode = 1;
+}
+```
+
+Setelah itu fungsi `moveDir` akan dipanggil dan argumen yang diberikan adalah nama folder yang ingin dipindahkan.
+
+```c
+moveDir((void* ) argv[2]); // kalo pake ./soal3 -d
+```
+
+Pada fungsi `moveDir`, pertama direktori yang diberikan akan dibuka. Jika direktori yang diberikan tidak ada atau tidak bisa dibaca maka fungsi akan berhenti dan proses mengkategorikan gagal.
+
+```c
+char* path = (char* ) arg;
+
+DIR* dir; // Buat buka direktori
+struct dirent* dent; // Buat baca isi direktori
+
+dir = opendir(path); // Baca directorynya
+
+if (!dir) { // Directory gak bisa dibaca
+	berhasil = 0;
+
+	return NULL;
+}
+```
+
+Jika direktori yang diberikan ada dan bisa dibaca, maka fungsi `moveDir` akan membaca isi dari direktori yang diberikan. Jika ditemukan sebuah direktori lagi, maka akan dipanggil fungsi `moveDir` lagi namun argumen yang diberikan adalah path ke direktori tersebut.
+
+```c
+char fileWithPath[200]; // Nama file tambah pathnya
+
+while ((dent = readdir(dir)) != NULL) {
+	if (strcmp(dent->d_name, "..") && strcmp(dent->d_name, ".")) {
+		strcpy(fileWithPath, path);
+		strcat(fileWithPath, "/");
+		strcat(fileWithPath, dent->d_name);
+
+		if (isDirectory(fileWithPath)) { // Kalau direktori
+			moveDir((char* ) fileWithPath); // Masuk direktorinya terus proses filenya
+		}
+	}
+}
+```
+
+Jika tidak ada lagi direktori yang terbaca, maka fungsi `moveFile` akan mengkategorikan file - file yang ada dalam direktori sekarang. Semua file yang bukan merupakan direktori akan disimpan namanya beserta dengan pathnya di dalam array `fileNameList` dan variabel `fileIndex` ditambahkan satu. Jika jumlah file yang dapat diproses sudah mencapai batas, maka semua file yang namanya sudah disimpan akan dikategorikan. Untuk setiap file akan dibuatkan satu thread. Thread yang dibuat akan memanggil fungsi `moveFile` dan fungsi `moveFile` diberikan argumen nama file tersebut beserta dengan pathnya untuk dikategorikan. Setelah dibuatkan thread untuk masing - masing file, maka selanjutkan akan dilakukan join untuk semua thread yang sudah dibuat. Jika loop untuk mengkategorikan file sudah selesai dan masih ada file yang belum diproses, maka file - file tersebut akan dikategorikan sama seperti ketika dalam loop. Setelah semua file sudah dikategorikan, maka direktori tersebut akan ditutup.
+
+```c
+char fileNameList[FILES_MAX][200]; // Nama - nama file buat dikategorikan
+int fileCount = 0; // Jumlah file bukan direktori
+int error;
+
+seekdir(dir, 0);
+
+while ((dent = readdir(dir)) != NULL) {
+	if (strcmp(dent->d_name, "..") && strcmp(dent->d_name, ".")) {
+		strcpy(fileWithPath, path);
+		strcat(fileWithPath, "/");
+		strcat(fileWithPath, dent->d_name);
+
+		if (!isDirectory(fileWithPath)) {
+			strcpy(fileNameList[fileIndex], fileWithPath); // Simpen nama file
+			fileIndex++;
+		}
+	}
+
+	if (fileIndex == FILES_MAX) { // Kalau jumlah file dah mencapai limit
+		int j;
+		for (j = 0; j < fileIndex; j++) {
+			error = pthread_create(&fileThread[j], NULL, moveFile, (void* ) fileNameList[j]);
+			if (error) berhasil = 0;
+		}
+
+		for (j = 0; j < fileIndex; j++) { // Join semua thread
+			pthread_join(fileThread[j], NULL);
+		}
+
+		fileIndex = 0;
+	}
+}
+
+if (fileIndex) { // Kalau masih ada file yang belom dikategorikan
+	int j;
+	for (j = 0; j < fileIndex; j++) {
+		error = pthread_create(&fileThread[j], NULL, moveFile, (void* ) fileNameList[j]);
+		if (error) berhasil = 0;
+	}
+
+	for (j = 0; j < fileIndex; j++) {
+		pthread_join(fileThread[j], NULL);
+	}
+}
+
+// Close directorynya
+
+closedir(dir);
+```
 
 ### Kendala ###
 
