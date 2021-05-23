@@ -979,7 +979,7 @@ moveDir((void* ) "."); // kalo pake ./soal3 \*
 
 ### Kendala ###
 
-Tidak ada kendala.
+Karena file yang dikategorikan akan memiliki path yang diawali '.', fungsi `moveFile` harus diperbaiki karena sebelumnya memproses semua file sebagai file *hidden*. Untuk mengecek tipe file yang diproses harus menggunakan nama file saja tanpa pathnya.
 
 **(d)** Semua file harus berada di dalam folder, jika terdapat file yang tidak memiliki ekstensi, file disimpan dalam folder “Unknown”. Jika file hidden, masuk folder “Hidden”.
 
@@ -1192,4 +1192,4 @@ if (fileIndex) { // Kalau masih ada file yang belom dikategorikan
 
 ### Kendala ###
 
-Tidak ada kendala.
+Sebelumnya dicoba untuk memproses file langsung, tetapi untuk mode `-d` dan `\*` tidak bekerja. Sehingga untuk mengkategorikan file pada mode - mode tersebut pertama nama file akan disimpan terlebih dahulu kemudian baru diproses.
