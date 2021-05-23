@@ -44,7 +44,7 @@ id2:password2
 ``
 Jawaban : 
 Pada saat penggunaan yang menginginkan multi-connections maka kita membutuhkan thread sebagai alat untuk melakukan aktifitas tersebut. Oleh karena itu disini saya membuat dua buah thread untuk mengakomodasi hal tersebut untuk menyimpan username dan password.
-
+```
 //client
 int main(int argc, char const *argv[])
 {
@@ -61,7 +61,8 @@ int main(int argc, char const *argv[])
     close(fdc);
     return 0;
 }
-
+```
+```
 //register
 void daftar(char *messages, int fd)
 {
@@ -102,12 +103,12 @@ void login(char *messages, int fd)
     }
     fclose(fp);
 }
-
+```
 b. Sistem memiliki sebuah database yang bernama files.tsv. Isi dari files.tsv ini adalah path file saat berada di server, publisher, dan tahun publikasi. Setiap penambahan dan penghapusan file pada folder file yang bernama  FILES pada server akan memengaruhi isi dari files.tsv. Folder FILES otomatis dibuat saat server dijalankan.
 
 Jawaban : 
 Setiap memasukkan sesuatu akan dideteksi dan akan dimasukkan ke database yaitu files.tsv disemua fungsi terdapat semua open files.tsv untuk mencatat apakah data tersebut ditambahkan atau dihapus.
-
+```
 void add(char *messages, int fd)
 {
     char *dirName = "FILES";
@@ -135,7 +136,7 @@ void add(char *messages, int fd)
     }
     fclose(fp);
 }
-
+```
 c. Tidak hanya itu, Keverk juga diminta membuat fitur agar client dapat menambah file baru ke dalam server. Direktori FILES memiliki struktur direktori di bawah ini : 
 
 Direktori FILES 
@@ -158,7 +159,7 @@ Kemudian, dari aplikasi client akan dimasukan data buku tersebut (perlu diingat 
 
 Jawaban : 
 Disini perlu melakukan pengecekkan apakah data tersebut sudah ada atau belum. Apabila data tersebut belum ada maka akan dilakukan input data seperti diabawah ini.
-
+```
 void add(char *messages, int fd)
 {
     char *dirName = "FILES";
@@ -186,7 +187,7 @@ void add(char *messages, int fd)
     }
     fclose(fp);
 }
-
+```
 d. Dan client dapat mendownload file yang telah ada dalam folder FILES di server, sehingga sistem harus dapat mengirim file ke client. Server harus melihat dari files.tsv untuk melakukan pengecekan apakah file tersebut valid. Jika tidak valid, maka mengirimkan pesan error balik ke client. Jika berhasil, file akan dikirim dan akan diterima ke client di folder client tersebut. 
 
 Contoh Command client
@@ -194,7 +195,7 @@ Contoh Command client
 
 Jawaban : 
 Disini saya membuat sebuah fungsi yang berguna untuk melakukan pengecekkan sehingga dibutuhkan pesan error apabila file tersebut tidak ada, dan memberikan peringatan juga agar file tersebut tidak duplikat.
-
+```
 void download(char *filename, int fd)
 {
     FILE *fp = fopen("files.tsv", "a+");
@@ -205,7 +206,7 @@ void download(char *filename, int fd)
     }
     fclose(fp);
 }
-
+```
 e. Setelah itu, client juga dapat menghapus file yang tersimpan di server. Akan tetapi, Keverk takut file yang dibuang adalah file yang penting, maka file hanya akan diganti namanya menjadi ‘old-NamaFile.ekstensi’. Ketika file telah diubah namanya, maka row dari file tersebut di file.tsv akan terhapus.
 
 Contoh Command Client:
@@ -213,7 +214,7 @@ Contoh Command Client:
 
 Jawaban : 
 Disini saya membuat sebuah fungsi delete yang berguna untuk melakukan penghapusan data di files.tsv serta menambahkan history di running.log
-
+```
 void hapus(char *filename, int fd)
 {
     //buka file
@@ -247,7 +248,7 @@ void hapus(char *filename, int fd)
         fclose(fp);
     }
 }
-
+```
 f.Client dapat melihat semua isi files.tsv dengan memanggil suatu perintah yang bernama see. Output dari perintah tersebut keluar dengan format. 
 
 Contoh Command Client :
@@ -270,7 +271,7 @@ Filepath :
 ``
 Jawaban : 
 Disini saya membuat sebuah fungsi yang bertujuan untuk melihat data di files.tsv untuk memastikan data tersebut ada dengan membuat fitur boolean sehingga bisa digunakan didua kondisi. Kondisi see dan find dengan menggunakan strstr
-
+```
 void see(char *buf, int fd, bool isFind)
 {
     int counter = 0;
@@ -301,7 +302,7 @@ void see(char *buf, int fd, bool isFind)
     } 
     fclose(src);
 }
-
+```
 g. Aplikasi client juga dapat melakukan pencarian dengan memberikan suatu string. Hasilnya adalah semua nama file yang mengandung string tersebut. Format output seperti format output f.
 
 Contoh Client Command:
@@ -309,7 +310,7 @@ Contoh Client Command:
 
 Jawaban : 
 Disini saya membuat sekaligus dengan fungsi see untuk upaya tidak doublenya pencarian. Karena disini mengecek data yang dengan menggunakan strstr.
-
+```
 void see(char *buf, int fd, bool isFind)
 {
     int counter = 0;
@@ -340,7 +341,7 @@ void see(char *buf, int fd, bool isFind)
     } 
     fclose(src);
 }
-
+```
 h. Dikarenakan Keverk waspada dengan pertambahan dan penghapusan file di server, maka Keverk membuat suatu log untuk server yang bernama running.log. Contoh isi dari log ini adalah
 
 running.log
@@ -350,7 +351,7 @@ Hapus : File2.ektensi (id:pass)
 ``
 Jawaban : 
 Disini saya membuat sebuah fungsi yang bertujuan untuk mengecek apakah ada penambahan atau pengurangan data sehingga fungsi ini dimasukkan kedalam fungsi penambahan dan fungsi pengurangan untuk pengecekkan.
-
+```
 void runninglog(char *cmd, char *filename)
 {
     FILE *fp = fopen("running.log", "a+");
@@ -358,7 +359,7 @@ void runninglog(char *cmd, char *filename)
     fprintf(fp, "%s : %s (%s:%s)\n", cmd, filename, validator[0], validator[1]);
     fclose(fp);
 }
-
+```
 ## Soal 2 ##
 
 Crypto (kamu) adalah teman Loba. Suatu pagi, Crypto melihat Loba yang sedang kewalahan mengerjakan tugas dari bosnya. Karena Crypto adalah orang yang sangat menyukai tantangan, dia ingin membantu Loba mengerjakan tugasnya. Detil dari tugas tersebut adalah:
