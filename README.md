@@ -394,6 +394,7 @@ void runninglog(char *cmd, char *filename)
 }
 ```
 Hasilnya:
+
 [![message-Image-1621775860947.jpg](https://i.postimg.cc/mgttSZjW/message-Image-1621775860947.jpg)](https://postimg.cc/jDYxxbBM)
 
 Kendala :
