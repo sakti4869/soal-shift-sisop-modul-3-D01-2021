@@ -106,6 +106,10 @@ void login(char *messages, int fd)
     fclose(fp);
 }
 ```
+
+Hasilnya:
+[![message-Image-1621775029139.jpg](https://i.postimg.cc/wvzrkZ9D/message-Image-1621775029139.jpg)](https://postimg.cc/bG6Ly6Dv)
+
 b. Sistem memiliki sebuah database yang bernama files.tsv. Isi dari files.tsv ini adalah path file saat berada di server, publisher, dan tahun publikasi. Setiap penambahan dan penghapusan file pada folder file yang bernama  FILES pada server akan memengaruhi isi dari files.tsv. Folder FILES otomatis dibuat saat server dijalankan.
 
 Jawaban : 
