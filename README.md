@@ -939,6 +939,15 @@ if (fileIndex) { // Kalau masih ada file yang belom dikategorikan
 closedir(dir);
 ```
 
+Terakhir program akan menampilkan pesan yang memberitahu proses mengkategorikan file berhasil atau tidak.
+
+```c
+if (berhasil)
+	printf("Direktori sukses disimpan!\n");
+else
+	printf("Yah, gagal disimpan :(\n");
+```
+
 ### Kendala ###
 
 Tidak ada kendala.
@@ -954,7 +963,19 @@ menjalankan program C tersebut.
 
 ### Cara Pengerjaan ###
 
-1. Hampir sama dengan no b, hanya saja ketika awal dipanggil mempassing path "." untuk fungsi moveDir.
+Pertama dicek jika argumen pertama yang diberikan adalah `\*`
+
+```c
+if (!strcmp(argv[1], "*")) {
+	mode = 2;
+}
+```
+
+Setelah itu akan dipanggil fungsi `moveDir` sama seperti pada nomor B, tetapi argumen untuk direktori yang diberikan adalah `"."` agar fungsi tersebut mengkategorikan semua file - file yang ada pada direktori file soal3.c.
+
+```c
+moveDir((void* ) "."); // kalo pake ./soal3 \*
+```
 
 ### Kendala ###
 
@@ -964,7 +985,130 @@ Tidak ada kendala.
 
 ### Cara Pengerjaan ###
 
-1. Sudah dikerjakan di no a pada fungsi moveFile.
+Fungsi `moveFile` akan membedakan antara file biasa yang memiliki ekstensi, file tersembunyi, dan file yang tidak memiliki ekstensi. Pertama fungsi `moveFile` akan menyimpan nama file tanpa pathnya.
+
+```c
+// File name tanpa path
+
+char* fileNameNoPath = (char* ) arg;
+char* temp = fileNameNoPath;
+
+while (1) { // Skip semua tanda /
+	if (*temp == '\0') break;
+
+	if (*temp == '/')
+		fileNameNoPath = temp + 1;
+
+	temp++;
+}
+```
+
+Setelah diperoleh nama file tanpa pathnya, akan dicek tipe file tersebut. Jika file tersebut diawali oleh '.', maka file tersebut adalah file *hidden*. Jika file tersebut tidak memiliki '.' pada namanya, maka file tersebut dianggap file *unknown*. Selain itu, file tersebut akan diperlakukan seperti file biasa yang memiliki ekstensi.
+
+```c
+// Check tipe file
+
+int tipeFile = 0; // 0 - File biasa, 1 - File hidden, 2 - File unknown
+
+if (fileNameNoPath[0] == '.') // Check kalo filenya hidden
+	tipeFile = 1;
+
+if (strchr(fileNameNoPath, '.') == NULL) // Check kalo filenya unknown
+	tipeFile = 2;
+```
+
+Untuk file biasa, pertama akan dicek ekstensi dari file tersebut. Setelah diperoleh ekstensi dari file tersebut, akan dibuatkan folder yang diberikan nama sesuai dengan ekstensi file tersebut. Setelah itu file akan dipindahkan ke folder tersebut dengan memanggil fungsi `rename`. Fungsi `rename` diberikan dua argumen yaitu nama file beserta pathnya yang ingin dipindahkan, dan nama file tersebut namun dengan path yang baru yaitu folder yang diberikan nama sesuai dengan ekstensi filenya.
+
+```c
+if (tipeFile == 0) { // Kalo filenya file biasa
+	// Cek ekstensi filenya
+
+	char fileExt[20];
+	strcpy(fileExt, strchr(fileNameNoPath, '.') + 1);
+
+	// Buat ekstensi file case - insensitive
+
+	int i;
+	for (i = 0; i < strlen(fileExt); i++)
+		fileExt[i] = tolower(fileExt[i]);
+
+	if (access(fileExt, F_OK) != 0) // Directory blom ada
+		if (mkdir(fileExt, 0777) != 0) { // Kalo gagal buat direktori
+			if (mode == 0) printf("%s : Sad, gagal :(\n", fileName);
+			berhasil = 0;
+
+			return NULL;
+		}
+
+	// File name dengan path baru
+
+	char fileNameNewPath[200]; // Nama file dengan folder baru
+	strcpy(fileNameNewPath, fileExt);
+	strcat(fileNameNewPath, "/");
+	strcat(fileNameNewPath, fileNameNoPath);
+
+	if (rename(fileName, fileNameNewPath) == 0)
+		if (mode == 0) printf("%s : Berhasil Dikategorikan\n", fileName);
+	else {
+		if (mode == 0) printf("%s : Sad, gagal :(\n", fileName);
+		return NULL;
+	}
+}
+```
+
+Untuk file *hidden* pertama akan dibuatkan folder `Hidden` untuk menyimpan file tersebut. Setelah itu file akan dipindahkan sama seperti untuk file biasa, namun huruf '.' pada nama file *hidden* tersebut akan dibuang agar setelah dikategorikan file tersebut tidak lagi tersembunyi.
+
+```c
+if (tipeFile == 1) { // File hidden
+	if (access("Hidden", F_OK) != 0) // Direktori belom ada
+		if (mkdir("Hidden", 0777) != 0) { // Gagal buat direktori
+			if (mode == 0) printf("%s : Sad, gagal :(\n", fileName);
+			berhasil = 0;
+
+			return NULL;
+		}
+
+	// File name dengan path baru
+
+	char fileNameNewPath[200]; // Nama file dengan folder baru
+	strcpy(fileNameNewPath, "Hidden/");
+	strcat(fileNameNewPath, fileNameNoPath + 1); // Skip dot diawal biar gak hidden
+
+	if (rename(fileName, fileNameNewPath) == 0)
+		if (mode == 0) printf("%s : Berhasil Dikategorikan\n", fileName);
+	else {
+		if (mode == 0) printf("%s : Sad, gagal :(\n", fileName);
+		return NULL;
+	}
+}
+```
+
+Untuk file tanpa ekstensi, prosesnya sama seperti file biasa, hanya saja file tersebut akan dipindahkan ke folder `Unknown` ketika dikategorikan.
+
+```c
+if (tipeFile == 2) { // File unknown
+	if (access("Unknown", F_OK) != 0) // Direktori blom ada
+		if (mkdir("Unknown", 0777) != 0) { // Gagal buat direktori
+			if (mode == 0) printf("%s : Sad, gagal :(\n", fileName);
+			berhasil = 0;
+
+			return NULL;
+		}
+
+	// File name dengan path baru
+
+	char fileNameNewPath[200]; // Nama file dengan folder baru
+	strcpy(fileNameNewPath, "Unknown/");
+	strcat(fileNameNewPath, fileNameNoPath);
+
+	if (rename(fileName, fileNameNewPath) == 0)
+		if (mode == 0) printf("%s : Berhasil Dikategorikan\n", fileName);
+	else {
+		if (mode == 0) printf("%s : Sad, gagal :(\n", fileName);
+		return NULL;
+	}
+}
+```
 
 ### Kendala ###
 
