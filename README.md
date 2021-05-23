@@ -42,7 +42,9 @@ akun.txt
 id:password
 id2:password2
 ``
+
 Jawaban : 
+
 Pada saat penggunaan yang menginginkan multi-connections maka kita membutuhkan thread sebagai alat untuk melakukan aktifitas tersebut. Oleh karena itu disini saya membuat dua buah thread untuk mengakomodasi hal tersebut untuk menyimpan username dan password.
 ```
 //client
@@ -107,6 +109,7 @@ void login(char *messages, int fd)
 b. Sistem memiliki sebuah database yang bernama files.tsv. Isi dari files.tsv ini adalah path file saat berada di server, publisher, dan tahun publikasi. Setiap penambahan dan penghapusan file pada folder file yang bernama  FILES pada server akan memengaruhi isi dari files.tsv. Folder FILES otomatis dibuat saat server dijalankan.
 
 Jawaban : 
+
 Setiap memasukkan sesuatu akan dideteksi dan akan dimasukkan ke database yaitu files.tsv disemua fungsi terdapat semua open files.tsv untuk mencatat apakah data tersebut ditambahkan atau dihapus.
 ```
 void add(char *messages, int fd)
@@ -158,6 +161,7 @@ Filepath:
 Kemudian, dari aplikasi client akan dimasukan data buku tersebut (perlu diingat bahwa Filepath ini merupakan path file yang akan dikirim ke server). Lalu client nanti akan melakukan pengiriman file ke aplikasi server dengan menggunakan socket. Ketika file diterima di server, maka row dari files.tsv akan bertambah sesuai dengan data terbaru yang ditambahkan.
 
 Jawaban : 
+
 Disini perlu melakukan pengecekkan apakah data tersebut sudah ada atau belum. Apabila data tersebut belum ada maka akan dilakukan input data seperti diabawah ini.
 ```
 void add(char *messages, int fd)
@@ -194,6 +198,7 @@ Contoh Command client
 ``download TEMPfile.pdf``
 
 Jawaban : 
+
 Disini saya membuat sebuah fungsi yang berguna untuk melakukan pengecekkan sehingga dibutuhkan pesan error apabila file tersebut tidak ada, dan memberikan peringatan juga agar file tersebut tidak duplikat.
 ```
 void download(char *filename, int fd)
@@ -213,6 +218,7 @@ Contoh Command Client:
 ``delete TEMPfile.pdf``
 
 Jawaban : 
+
 Disini saya membuat sebuah fungsi delete yang berguna untuk melakukan penghapusan data di files.tsv serta menambahkan history di running.log
 ```
 void hapus(char *filename, int fd)
@@ -271,6 +277,7 @@ Filepath :
 ``
 
 Jawaban : 
+
 Disini saya membuat sebuah fungsi yang bertujuan untuk melihat data di files.tsv untuk memastikan data tersebut ada dengan membuat fitur boolean sehingga bisa digunakan didua kondisi. Kondisi see dan find dengan menggunakan strstr
 ```
 void see(char *buf, int fd, bool isFind)
@@ -310,6 +317,7 @@ Contoh Client Command:
 ``find TEMP``
 
 Jawaban : 
+
 Disini saya membuat sekaligus dengan fungsi see untuk upaya tidak doublenya pencarian. Karena disini mengecek data yang dengan menggunakan strstr.
 ```
 void see(char *buf, int fd, bool isFind)
@@ -352,6 +360,7 @@ Hapus : File2.ektensi (id:pass)
 ``
 
 Jawaban : 
+
 Disini saya membuat sebuah fungsi yang bertujuan untuk mengecek apakah ada penambahan atau pengurangan data sehingga fungsi ini dimasukkan kedalam fungsi penambahan dan fungsi pengurangan untuk pengecekkan.
 ```
 void runninglog(char *cmd, char *filename)
