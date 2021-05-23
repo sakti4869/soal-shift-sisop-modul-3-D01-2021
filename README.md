@@ -1116,11 +1116,79 @@ Tidak ada kendala.
 
 **(e)** Setiap 1 file yang dikategorikan dioperasikan oleh 1 thread agar bisa berjalan secara paralel sehingga proses kategori bisa berjalan lebih cepat.
 
-
-
 ### Cara Pengerjaan ###
 
-1. Sudah dikerjakan di no a dan b.
+Jika program dijalankan dengan argumen `-f`, maka file - file yang diberikan sebagai argumen akan dikategorikan langsung. Untuk setiap file akan dibuatkan thread yang akan memanggil fungsi `moveFile` dan diberikan argumen nama file tersebut untuk dikategorikan. Jika jumlah file maksimum yang bisa diproses sudah tercapai, maka akan dilakukan join semua thread yang sudah dibuat terlebih dahulu sebelum melanjutkan proses mengkategorikan file - file yang lainnya.
+
+```c
+for (i = 0; i < fileCount; i++) {
+	pthread_create(&fileThread[fileIndex], NULL, moveFile, (void *) argv[argc - 1 - i]);
+	fileIndex++;
+
+	if (fileIndex == FILES_MAX) {
+		int j;
+		for (j = 0; j < fileIndex; j++)
+			pthread_join(fileThread[j], NULL);
+
+		fileIndex = 0;
+	}
+}
+```
+
+Jika loop untuk memproses file sudah selesai tetapi masih ada thread yang belum dijoin, maka akan dilakukan join thread setelah loop selesai.
+
+```c
+for (i = 0; i < fileIndex; i++) {
+	pthread_join(fileThread[i], NULL);
+}
+```
+
+Jika program dijalankan dengan argumen `-d` atau `\*`, maka akan dipanggil fungsi `moveDir`. Fungsi `moveDir` akan masuk ke dalam direktori yang paling dalam terlebih dahulu baru memproses file - file yang ada pada direktori yang paling dalam. Ketika memproses file, akan dibuat thread yang akan memanggil fungsi `moveFile` yang diberikan argumen nama file yang akan dikategorikan yang berada pada direktori tersebut. Jika jumlah file yang diproses sudah mencapai batas maksimum file yang dapat diproses, maka akan dilakukan join thread terlebih dahulu sebelum melanjutkan proses mengkategorikan file - file pada direktori tersebut.
+
+```c
+while ((dent = readdir(dir)) != NULL) {
+	if (strcmp(dent->d_name, "..") && strcmp(dent->d_name, ".")) {
+		strcpy(fileWithPath, path);
+		strcat(fileWithPath, "/");
+		strcat(fileWithPath, dent->d_name);
+
+		if (!isDirectory(fileWithPath)) {
+			strcpy(fileNameList[fileIndex], fileWithPath); // Simpen nama file
+			fileIndex++;
+		}
+	}
+
+	if (fileIndex == FILES_MAX) { // Kalau jumlah file dah mencapai limit
+		int j;
+		for (j = 0; j < fileIndex; j++) {
+			error = pthread_create(&fileThread[j], NULL, moveFile, (void* ) fileNameList[j]);
+			if (error) berhasil = 0;
+		}
+
+		for (j = 0; j < fileIndex; j++) { // Join semua thread
+			pthread_join(fileThread[j], NULL);
+		}
+
+		fileIndex = 0;
+	}
+}
+```
+
+Jika loop untuk membaca isi direktori sudah selesai dan masih ada file yang dikategorikan, maka proses join thread akan dilakukan setelah loop selesai.
+
+```c
+if (fileIndex) { // Kalau masih ada file yang belom dikategorikan
+	int j;
+	for (j = 0; j < fileIndex; j++) {
+		error = pthread_create(&fileThread[j], NULL, moveFile, (void* ) fileNameList[j]);
+		if (error) berhasil = 0;
+	}
+
+	for (j = 0; j < fileIndex; j++) {
+		pthread_join(fileThread[j], NULL);
+	}
+}
+```
 
 ### Kendala ###
 
