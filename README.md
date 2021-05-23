@@ -852,6 +852,10 @@ Fungsi moveFile akan membedakan antara file biasa yang diketahui ekstensinya, fi
 
 Tidak ada kendala.
 
+### Hasil ###
+
+![Soal3A](https://i.postimg.cc/y8S1s3Lt/a.png)
+
 **(b)** Program juga dapat menerima opsi -d untuk melakukan pengkategorian pada suatu directory. Namun pada opsi -d ini, user hanya bisa memasukkan input 1 directory saja, tidak seperti file yang bebas menginput file sebanyak mungkin.
 
 Contohnya adalah seperti ini:
@@ -991,6 +995,10 @@ else
 
 Tidak ada kendala.
 
+### Hasil ###
+
+![Soal3B](https://i.postimg.cc/W3sTGWsc/b2.png)
+
 **(c)** Selain menerima opsi-opsi di atas, program ini menerima opsi \*, contohnya ada di bawah ini:
 
 ```
@@ -1019,6 +1027,10 @@ moveDir((void* ) "."); // kalo pake ./soal3 \*
 ### Kendala ###
 
 Karena file yang dikategorikan akan memiliki path yang diawali '.', fungsi `moveFile` harus diperbaiki karena sebelumnya memproses semua file sebagai file *hidden*. Untuk mengecek tipe file yang diproses harus menggunakan nama file saja tanpa pathnya.
+
+### Hasil ###
+
+![Soal3C](https://i.postimg.cc/rp1qtXX9/c.png)
 
 **(d)** Semua file harus berada di dalam folder, jika terdapat file yang tidak memiliki ekstensi, file disimpan dalam folder “Unknown”. Jika file hidden, masuk folder “Hidden”.
 
@@ -1152,6 +1164,10 @@ if (tipeFile == 2) { // File unknown
 ### Kendala ###
 
 Tidak ada kendala.
+
+### Hasil ###
+
+![Soal3D](https://i.postimg.cc/rpX8mybm/d.png)
 
 **(e)** Setiap 1 file yang dikategorikan dioperasikan oleh 1 thread agar bisa berjalan secara paralel sehingga proses kategori bisa berjalan lebih cepat.
 
